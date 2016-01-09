@@ -1,19 +1,17 @@
 ## Shiny app for [Titanic: Machine Learning from Disaster "Getting Started" Kaggle Competition](https://www.kaggle.com/c/titanic)
 
 Purpose - Use machine learning to predict which passengers survived the tragedy.
+
 Implementation - **NEED FINISH THIS**
 
 ### Dataset - downloaded from [here](https://www.kaggle.com/c/titanic/data)
 
-Data already broken up into separate training and testing data sets and also
-contains a gendermodel and genderclassmodel.  Due to Kaggle requiring a click
-to download data, data also uploaded to this GitHub repo so can be downloaded
-into R directly at the launch of this Shiny app.
+Data already broken up into separate training and testing data sets.  Due to
+Kaggle requiring a click to download data, data also uploaded to this GitHub
+repo so can be downloaded into R directly at the launch of this Shiny app.
 
 * [train.csv](data/train.csv)
 * [test.csv](data/test.csv)
-* [gendermodel.csv](data/gendermodel.csv)
-* [genderclassmodel.csv](data/genderclassmodel.csv)
 
 #### Data Description
 
