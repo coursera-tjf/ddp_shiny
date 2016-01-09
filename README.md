@@ -10,10 +10,10 @@ contains a gendermodel and genderclassmodel.  Due to Kaggle requiring a click
 to download data, data also uploaded to this GitHub repo so can be downloaded
 into R directly at the launch of this Shiny app.
 
-* [train.csv](../tree/master/data/train.csv)
-* [test.csv](../tree/master/data/test.csv)
-* [gendermodel.csv](../tree/master/data/gendermodel.csv)
-* [genderclassmodel.csv](../tree/master/data/genderclassmodel.csv)
+* [train.csv](data/train.csv)
+* [test.csv](data/test.csv)
+* [gendermodel.csv](data/gendermodel.csv)
+* [genderclassmodel.csv](data/genderclassmodel.csv)
 
 ### Assignment = will delete
 
