@@ -17,6 +17,7 @@ into R directly at the launch of this Shiny app.
 
 #### Data Description
 
+```
 VARIABLE DESCRIPTIONS:
 survival        Survival
                 (0 = No; 1 = Yes)
@@ -54,6 +55,7 @@ nephews/nieces, aunts/uncles, and in-laws.  Some children travelled
 only with a nanny, therefore parch=0 for them.  As well, some
 travelled with very close friends or neighbors in a village, however,
 the definitions do not support such relations.
+```
 
 ### Assignment = will delete
 
