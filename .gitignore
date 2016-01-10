@@ -1,1 +1,4 @@
+# R history files
 .Rhistory
+# vi swap files
+*.swp
