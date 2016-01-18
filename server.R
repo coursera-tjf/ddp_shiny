@@ -5,59 +5,242 @@ library(dplyr)
 library(ggplot2)
 library(caret)
 
-# read in raw data
-raw.training.all <- fread(file.path('data', 'train.csv'))
-raw.survived <- select(raw.training.all, one_of('Survived'))
-raw.training <- select(raw.training.all, -one_of('Survived'))
-raw.testing <- fread(file.path('data', 'test.csv'))
-
-# process data by adding factors for Survived, Pclass, Sex, and Embarked
-# as well as processing age as described
-#
-# TODO - need handle missing data in Age
-process.data <- function(x) {
-  if ('Survived' %in% colnames(x))
-    x$Survived <- factor(x$Survived, levels=c(0,1), labels=c('No', 'Yes'))
-  x$Pclass <- factor(x$Pclass, levels=c(1,2,3), labels=c('1st', '2nd', '3rd'))
-  x$Sex <- factor(x$Sex, levels=c('male', 'female'), labels=c('male', 'female'))
-  x$Embarked <- factor(x$Embarked, levels=c('C', 'Q', 'S'),
-    labels=c('Cherbourg', 'Queenstown', 'Southampton'))
+# Disable shiny widget, from:
+# https://groups.google.com/forum/#!topic/shiny-discuss/uSetp4TtW-s
+disable <- function(x) {
+  if (inherits(x, 'shiny.tag')) {
+    if (x$name %in% c('input', 'select'))
+      x$attribs$disabled <- 'disabled'
+    x$children <- disable(x$children)
+  }
+  else if (is.list(x) && length(x) > 0) {
+    for (i in 1:length(x))
+      x[[i]] <- disable(x[[i]])
+  }
   x
 }
 
-proc.training.all <- process.data(raw.training.all)
-proc.survived <- select(proc.training.all, one_of('Survived'))
-proc.training <- select(proc.training.all, -one_of('Survived'))
-proc.testing <- process.data(raw.testing)
+getProcessData <- function(p) {
+  # read in raw data
+  raw.training.all <- fread(file.path('data', 'train.csv'))
+  # TODO - handle all missing values - for right now, only use complete cases
+  raw.training.all <- raw.training.all[complete.cases(raw.training.all),]
+  raw.training.outcome <- select(raw.training.all, one_of('Survived'))
+  raw.training.predictors <- select(raw.training.all, -one_of('Survived'))
+  raw.testing.predictors <- fread(file.path('data', 'test.csv'))
+
+
+  # process data by adding factors for Survived, Pclass, Sex, and Embarked
+  #
+  # TODO - need handle missing data in Age
+  process.data <- function(x) {
+    # factorize some variables
+    if ('Survived' %in% colnames(x))
+      x$Survived <- factor(x$Survived, levels=c(0,1), labels=c('No', 'Yes'))
+    x$Pclass <- factor(x$Pclass, levels=c(1,2,3), labels=c('1st', '2nd', '3rd'))
+    x$Sex <- factor(x$Sex, levels=c('male', 'female'), labels=c('male', 'female'))
+    x$Embarked <- factor(x$Embarked, levels=c('C', 'Q', 'S'),
+      labels=c('Cherbourg', 'Queenstown', 'Southampton'))
+    # factorize rest to use caret package for analysis
+    x$Name <- factor(x$Name)
+    x$Ticket <- factor(x$Ticket)
+    x$Cabin <- factor(x$Cabin)
+    x
+  }
+  # process data
+  proc.training.all <- process.data(raw.training.all)
+  proc.training.outcome <- select(proc.training.all, one_of('Survived'))
+  proc.training.predictors <- select(proc.training.all, -one_of('Survived'))
+  proc.testing.predictors <- process.data(raw.testing.predictors)
+  
+  # create initial training, validation, and training sets
+  inValidation <- createDataPartition(y=proc.training.outcome$Survived, p=p/100, list=FALSE)
+  proc.validation <- proc.training.all[inValidation,]
+  proc.training <- proc.training.all[-inValidation,]
+  proc.testing <- proc.testing.predictors
+  # raw version
+  raw.validation <- raw.training.all[inValidation,]
+  raw.training <- raw.training.all[-inValidation,]
+  raw.testing <- raw.testing.predictors
+  # bundle into list for use
+  list(rtr=raw.training, rv=raw.validation, rte=raw.testing, ptr=proc.training,
+    pv=proc.validation, pte=proc.testing)
+}
 
 shinyServer(
   function(input, output) {
+    # reactive functions to get and/or slice data - http://shiny.rstudio.com/tutorial/lesson6/
+    # reactive is not working as expected.  moving on for now and try to come back
+    dataInput <- reactive({
+      #getProcessData(input$sliderTrainValidation) 
+      getProcessData(40) 
+    })
 
-    # Raw Data Summary
-    output$rawSummaryOut <- renderPrint({ 
+    ## Data Summary
+    output$PredictorsSummaryOut <- renderPrint({ 
       summary(
-        if(input$rawSummaryOf=='a')
-          rbind(raw.training, raw.testing)
-        else
-          raw.training.all
+        if(input$RawOrProc == 'p') {      # proc
+          switch(input$SummaryOf,
+            a = rbind(dataInput()$ptr[,-"Survived",with=F], 
+              dataInput()$pv[,-"Survived",with=F], dataInput()$pte),
+            tv = rbind(dataInput()$ptr[,-"Survived",with=F], 
+              dataInput()$pv[,-"Survived",with=F]),
+            t = dataInput()$ptr[,-"Survived",with=F]
+          )
+        } else {                          # raw
+          switch(input$SummaryOf,
+            a = rbind(dataInput()$rtr[,-"Survived",with=F], 
+              dataInput()$rv[,-"Survived",with=F], dataInput()$rte),
+            tv = rbind(dataInput()$rtr[,-"Survived",with=F], 
+              dataInput()$rv[,-"Survived",with=F]),
+            t = dataInput()$rtr[,-"Survived",with=F]
+          )
+        } 
+      )
+    })
+    output$OutcomeSummaryOut <- renderPrint({ 
+      summary(
+        if(input$RawOrProc == 'p') {      # proc
+          switch(input$SummaryOf,
+            a = rbind(dataInput()$ptr[,"Survived",with=F], 
+              dataInput()$pv[,"Survived",with=F]),
+            tv = rbind(dataInput()$ptr[,"Survived",with=F], 
+              dataInput()$pv[,"Survived",with=F]),
+            t = rbind(dataInput()$ptr[,"Survived",with=F]) 
+          )
+        } else {                          # raw
+          switch(input$SummaryOf,
+            a = rbind(dataInput()$rtr[,"Survived",with=F], 
+              dataInput()$rv[,"Survived",with=F]),
+            tv = rbind(dataInput()$rtr[,"Survived",with=F], 
+              dataInput()$rv[,"Survived",with=F]),
+            t = rbind(dataInput()$rtr[,"Survived",with=F]) 
+          )
+        } 
       )
     })
 
-    # Processed Data Summary
-    output$procSummaryOut <- renderPrint({ 
-      summary(
-        if(input$procSummaryOf=='a')
-          rbind(proc.training, proc.testing)
-        else
-          proc.training.all
+    ## Explore Data
+    # pairs plot - always
+    output$expPairsPlot <- renderPlot({
+      featurePlot(x=proc.training.predictors, y=proc.training.outcome, 
+        plot='pairs', auto.key=list(columns=2))
+    })
+    # generate variable selectors for individual plots
+    output$expXaxisVarSelector <- renderUI({
+      selectInput('expXaxisVar', 'Variable on x-axis', 
+        choices=as.list(colnames(dataInput()$ptr)), selected='Pclass')
+    })
+    # generate variable selectors for individual plots
+    getYaxisVarSelector <- function(geom) { 
+      # wy = wtih y, wo = without y (or disable)
+      widget <- selectInput('expYaxisVar', 'Variable on y-axis', 
+        choices=as.list(colnames(dataInput()$ptr)), selected='Sex')
+      wy <- widget
+      woy <- disable(widget)
+      switch(geom,
+        point = wy,
+        boxplot = wy,
+        histogram = woy,
+        density = woy,
+        jitter = wy
       )
+    }
+    output$expYaxisVarSelector <- renderUI({
+      getYaxisVarSelector(input$singlePlotGeom)
+    })
+    output$expColorVarSelector <- renderUI({
+      selectInput('expColorVar', 'Variable to color by', 
+        choices=as.list(colnames(dataInput()$ptr)),
+        selected='Survived')
+    })
+    # create ggplot statement based on geom
+    add_ggplot <- function(geom) {
+      gx <- ggplot(dataInput()$ptr, aes_string(x=input$expXaxisVar))
+      gxy <- ggplot(dataInput()$ptr, aes_string(x=input$expXaxisVar, y=input$expYaxisVar))
+      switch(geom,
+        point = gxy,
+        boxplot = gxy,
+        histogram = gx,
+        density = gx,
+        jitter = gxy
+      )
+    }
+    # create ggplot geom
+    add_geom <- function(geom) {
+      switch(geom,
+        point = geom_point(aes_string(color=input$expColorVar)),
+        boxplot = geom_boxplot(aes_string(color=input$expColorVar)),
+        histogram = geom_histogram(aes_string(color=input$expColorVar)),
+        density = geom_density(aes_string(color=input$expColorVar)),
+        jitter = geom_jitter(aes_string(color=input$expColorVar))
+      )
+    }
+    output$expSinglePlot <- renderPlot({
+      g <- add_ggplot(input$singlePlotGeom) + add_geom(input$singlePlotGeom)
+      print(g)
     })
 
+    ## Data PreProcessing
+    #TODO - look at basic PreProcessing lecture, center, scale, and impute?
+    output$varsWithNA <- renderPrint({
+       
+    })
 
+    ## Prediction Model
+    # create feature selection
+    output$featureSelectInput <- renderUI({
+      selectInput('featureSelect', 'Select features to generate model', 
+        choices=as.list(colnames(dataInput()$ptr)),
+        multiple = TRUE, selected=c('Sex', 'Age', 'Pclass'))
+    })
+    # apply model to training set
+    applyModel <- function(modelType, features) {
+      # PreProcess data 1st
+      switch(modelType,
+        glm = train(Survived ~ ., 
+          data=select(dataInput()$ptr, one_of(c('Survived', features))), 
+          method=modelType, preProcess=input$preProcessMethods),
+        rf = train(Survived ~ ., 
+          data=select(dataInput()$ptr, one_of(c('Survived', features))), 
+          method=modelType, preProcess=input$preProcessMethods, prox=TRUE)
+      )
+    }
+    # reactive functions to run and evaluate model
+    runModel <- reactive({
+      switch(input$machLearnAlgorithm,
+        glm = applyModel(input$machLearnAlgorithm, input$featureSelect),
+        rf = applyModel(input$machLearnAlgorithm, input$featureSelect)
+      )
+    })
+    output$summaryModel <- renderPrint({
+      switch(input$machLearnAlgorithm,
+        glm = summary(runModel()),
+        rf = 'Same as Final Model Fit above'
+      )
+    })
+    # summary of final model
+    output$finalModel <- renderPrint({
+      runModel()
+    })
 
-
-
-
+    evalModel <- function(testData, features) {
+      predictions <- predict(runModel(), select(testData, one_of(features)))
+      # if length or predictions does not match length of testData, remove incomplete cases
+      if (length(predictions) != nrow(testData))
+        truthes <- testData[complete.cases(testData),]$Survived
+      else
+        truthes <- testData$Survived
+      # generate confusion matrix
+      confusionMatrix(predictions, truthes)
+    }
+    # accuracy of final model
+    output$inSampleAccuracy <- renderPrint({
+      evalModel(dataInput()$ptr, input$featureSelect)
+    })
+    output$outOfSampleAccuracy <- renderPrint({
+      evalModel(dataInput()$pv, input$featureSelect)
+    })
 
 
 
