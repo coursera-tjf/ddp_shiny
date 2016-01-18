@@ -1,5 +1,8 @@
 library(shiny)
 
+# constants
+kaggle.url <- 'https://www.kaggle.com/c/titanic'
+
 # Disable shiny widget, from:
 # https://groups.google.com/forum/#!topic/shiny-discuss/uSetp4TtW-s
 disable <- function(x) {
@@ -26,13 +29,20 @@ shinyUI(
     navbarPage('',
 
       # Problem Description
-      tabPanel('Problem Description',
-        sidebarLayout(
-          sidebarPanel(
-            p('placeholder')
-          ),
-          mainPanel(
-            p('placeholder')
+      tabPanel('0. Problem Description',
+        fluidPage(
+          h4('Summary'),
+            p('This Shiny app is a Machine Learning application used to evaluate different machine learning models as applied to the', 
+              a(href=kaggle.url, 'Titanic: Machine Leaning from Disaster Kaggle Competition')
+            ),
+        br(), br(),
+         h4('Steps to complete and evaluate a machine learning model'),
+          tags$ol(
+            tags$li('Examine the data summary - see what is in the data'),
+            tags$li('Explore the data - see what features to use in a model'),
+            tags$li('Build a prediction model - pre-process data, select features, and generate model'),
+            tags$li('Evaluate prediction model - estimate in-sample and out-of-sample errors'),
+            tags$li('Predict outcomes for test data')
           )
         )
       ),
@@ -41,7 +51,7 @@ shinyUI(
       # TODO need doc as to what you are looking at
       # TODO note survival shown if training only selected
       # separate outcomes from predictors
-      tabPanel('Data Slicing/Summary',
+      tabPanel('1. Data Summary',
         sidebarLayout(
           sidebarPanel(
   #          sliderInput('sliderTrainValidation', 
@@ -65,7 +75,8 @@ shinyUI(
       ),
       
       # explore the data
-      tabPanel('Explore Data',
+      #TODO - need add NONE
+      tabPanel('2. Explore Data',
         sidebarLayout(
           sidebarPanel(
             selectInput('singlePlotGeom', 'Select plot type', 
@@ -76,18 +87,17 @@ shinyUI(
             uiOutput('expColorVarSelector')
           ),
           mainPanel(
-            p('placeholder'),
-            #plotOutput('expPairsPlot')
-            plotOutput('expSinglePlot')
+            h4('One and Two Variable Plot'),
+            plotOutput('expSinglePlot'),
+            h4('Pairs Plot (only non-zero variance variables shown)'),
+            plotOutput('expPairsPlot', width='100%', height='800px')
           )
         )
       ),
      
-      # Data PreProcessing 
-      tabPanel('Data PreProcessing',
+      tabPanel('3. Build Prediction Model',
         sidebarLayout(
           sidebarPanel(
-            p('placeholder'),
             selectInput('preProcessMethods', 'Select data preprocessing method(s)',
               choices=c(
                 'Center Data' = 'center', 
@@ -99,17 +109,7 @@ shinyUI(
               ),
               selected='BoxCox', 
               multiple=TRUE
-            )
-          ),
-          mainPanel(
-            p('placeholder')
-          )
-        )
-      ),
-
-      tabPanel('Prediction Model',
-        sidebarLayout(
-          sidebarPanel(
+            ),
             uiOutput('featureSelectInput'),
             selectInput('machLearnAlgorithm', 
               'Select the model or machine learning algorithm',
@@ -126,11 +126,8 @@ shinyUI(
         )
       ),
 
-      # show model evaluation
-      tabPanel('Model Evaluation',
-        fluidRow(
-          wellPanel(completeModelSummary())
-        ),
+      # Evaluate model
+      tabPanel('4. Model Evaluation',
         fluidRow(
           column(6,
             wellPanel(
@@ -147,8 +144,9 @@ shinyUI(
         )
       ),
   
-      tabPanel('Test Data Results'
-      
+      tabPanel('5. Test Data Results',
+        h4('Predicted survival of individuals in the test data set'),
+          tableOutput('testPredictions')
       )
 
     )

@@ -2,7 +2,6 @@ library(shiny)
 library(data.table)
 library(plyr)
 library(dplyr)
-library(ggplot2)
 library(caret)
 
 # Disable shiny widget, from:
@@ -122,11 +121,14 @@ shinyServer(
 
     ## Explore Data
     # pairs plot - always
+    xcolsIgnore <- c('PassengerId', 'Name','Ticket', 'Cabin')#, 'Survived')
     output$expPairsPlot <- renderPlot({
-      featurePlot(x=proc.training.predictors, y=proc.training.outcome, 
+      featurePlot(x=dataInput()$ptr[,-xcolsIgnore, with=F], 
+        y=dataInput()$ptr$Survived, 
         plot='pairs', auto.key=list(columns=2))
     })
     # generate variable selectors for individual plots
+    # ideas from https://gist.github.com/jcheng5/3239667
     output$expXaxisVarSelector <- renderUI({
       selectInput('expXaxisVar', 'Variable on x-axis', 
         choices=as.list(colnames(dataInput()$ptr)), selected='Pclass')
@@ -179,12 +181,6 @@ shinyServer(
     output$expSinglePlot <- renderPlot({
       g <- add_ggplot(input$singlePlotGeom) + add_geom(input$singlePlotGeom)
       print(g)
-    })
-
-    ## Data PreProcessing
-    #TODO - look at basic PreProcessing lecture, center, scale, and impute?
-    output$varsWithNA <- renderPrint({
-       
     })
 
     ## Prediction Model
@@ -240,6 +236,14 @@ shinyServer(
     })
     output$outOfSampleAccuracy <- renderPrint({
       evalModel(dataInput()$pv, input$featureSelect)
+    })
+
+    # test data set predictions
+    output$testPredictions <- renderTable({
+      predictions <- predict(runModel(), select(dataInput()$pte, one_of(input$featureSelect)))
+      predictions <- cbind(dataInput()$pte$PassengerId, as.character(predictions))
+      colnames(predictions) <- c('PassengerId', 'Survived')
+      predictions
     })
 
 
