@@ -117,7 +117,8 @@ shinyUI(
             selectInput('machLearnAlgorithm', 
               'Select the model or machine learning algorithm',
               choices= c('Generalized Linear Model (logit)' = 'glm',
-                'Random Forests (may take a few minutes)' = 'rf'), 
+                'Random Forests (may take a few minutes)' = 'rf',
+                'Gradient Boosting' = 'gbm'), 
               selected='glm')
           ),
           mainPanel(

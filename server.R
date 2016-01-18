@@ -1,8 +1,12 @@
+# some libs for shinyapps to deploy correctly
 library(shiny)
+library(curl)
+library(e1071)
 library(data.table)
 library(plyr)
 library(dplyr)
 library(caret)
+library(gbm)
 
 # constants
 # these HAVE to be raw urls from github
@@ -191,7 +195,7 @@ shinyServer(
     # create feature selection
     output$featureSelectInput <- renderUI({
       selectInput('featureSelect', 'Select features to generate model', 
-        choices=as.list(colnames(dataInput()$ptr)),
+        choices=as.list(colnames(dataInput()$ptr[,-"Survived",with=F] )),
         multiple = TRUE, selected=c('Sex', 'Age', 'Pclass'))
     })
     # apply model to training set
@@ -203,20 +207,21 @@ shinyServer(
           method=modelType, preProcess=input$preProcessMethods),
         rf = train(Survived ~ ., 
           data=select(dataInput()$ptr, one_of(c('Survived', features))), 
-          method=modelType, preProcess=input$preProcessMethods, prox=TRUE)
+          method=modelType, preProcess=input$preProcessMethods, prox=TRUE),
+        gbm = train(Survived ~ ., 
+          data=select(dataInput()$ptr, one_of(c('Survived', features))), 
+          method=modelType, preProcess=input$preProcessMethods, verbose=FALSE)
       )
     }
     # reactive functions to run and evaluate model
     runModel <- reactive({
-      switch(input$machLearnAlgorithm,
-        glm = applyModel(input$machLearnAlgorithm, input$featureSelect),
-        rf = applyModel(input$machLearnAlgorithm, input$featureSelect)
-      )
+      applyModel(input$machLearnAlgorithm, input$featureSelect)
     })
     output$summaryModel <- renderPrint({
       switch(input$machLearnAlgorithm,
         glm = summary(runModel()),
-        rf = 'Same as Final Model Fit above'
+        rf = 'Same as Final Model Fit above',
+        gbm = summary(runModel())
       )
     })
     # summary of final model
