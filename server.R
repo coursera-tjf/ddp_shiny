@@ -3,10 +3,14 @@ library(shiny)
 library(curl)
 library(e1071)
 library(data.table)
+library(caret)
+# models for caret, need here explicitly for shinyapps deployment
+library(randomForest) # for rf
+library(gbm)    # for gbm
+library(mboost) # for glmboost
+library(klaR)   # for nb
 library(plyr)
 library(dplyr)
-library(caret)
-library(gbm)
 
 # constants
 # these HAVE to be raw urls from github
@@ -34,8 +38,8 @@ getProcessData <- function(p) {
   raw.training.all <- fread(train.url)
   # handle all missing values - for right now, only use complete cases
   raw.training.all <- raw.training.all[complete.cases(raw.training.all),]
-  raw.training.outcome <- select(raw.training.all, one_of('Survived'))
-  raw.training.predictors <- select(raw.training.all, -one_of('Survived'))
+  raw.training.outcome <- raw.training.all[,"Survived",with=F]
+  raw.training.predictors <- raw.training.all[,-"Survived",with=F]
   raw.testing.predictors <- fread(test.url)
 
 
@@ -56,8 +60,8 @@ getProcessData <- function(p) {
   }
   # process data
   proc.training.all <- process.data(raw.training.all)
-  proc.training.outcome <- select(proc.training.all, one_of('Survived'))
-  proc.training.predictors <- select(proc.training.all, -one_of('Survived'))
+  proc.training.outcome <- proc.training.all[,"Survived", with=F]
+  proc.training.predictors <- proc.training.all[,-"Survived",with=F]
   proc.testing.predictors <- process.data(raw.testing.predictors)
   
   # create initial training, validation, and training sets
@@ -199,30 +203,27 @@ shinyServer(
         multiple = TRUE, selected=c('Sex', 'Age', 'Pclass'))
     })
     # apply model to training set
+    # TODO - need verbose=F for gbm
     applyModel <- function(modelType, features) {
-      # PreProcess data 1st
-      switch(modelType,
-        glm = train(Survived ~ ., 
+      if (modelType == 'gbm')
+        train(Survived ~ ., 
           data=select(dataInput()$ptr, one_of(c('Survived', features))), 
-          method=modelType, preProcess=input$preProcessMethods),
-        rf = train(Survived ~ ., 
+          method=modelType, preProcess=input$preProcessMethods, verbose=F)
+      else
+        train(Survived ~ ., 
           data=select(dataInput()$ptr, one_of(c('Survived', features))), 
-          method=modelType, preProcess=input$preProcessMethods, prox=TRUE),
-        gbm = train(Survived ~ ., 
-          data=select(dataInput()$ptr, one_of(c('Survived', features))), 
-          method=modelType, preProcess=input$preProcessMethods, verbose=FALSE)
-      )
+          method=modelType, preProcess=input$preProcessMethods)
     }
     # reactive functions to run and evaluate model
     runModel <- reactive({
       applyModel(input$machLearnAlgorithm, input$featureSelect)
     })
+    # if summary(fit) has names, use it, if not, do not
     output$summaryModel <- renderPrint({
-      switch(input$machLearnAlgorithm,
-        glm = summary(runModel()),
-        rf = 'Same as Final Model Fit above',
-        gbm = summary(runModel())
-      )
+      if (!is.null(names(summary(runModel()))))
+        summary(runModel())
+      else
+        'Same as Final Model Fit above'
     })
     # summary of final model
     output$finalModel <- renderPrint({

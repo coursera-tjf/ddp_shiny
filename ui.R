@@ -118,7 +118,10 @@ shinyUI(
               'Select the model or machine learning algorithm',
               choices= c('Generalized Linear Model (logit)' = 'glm',
                 'Random Forests (may take a few minutes)' = 'rf',
-                'Gradient Boosting' = 'gbm'), 
+                'Gradient Boosting' = 'gbm',
+                'Boosted Generalized Linear Model' = 'glmboost',
+                'Linear Discriminant Analysis' = 'lda',
+                'Naive Bayes' = 'nb'), 
               selected='glm')
           ),
           mainPanel(
