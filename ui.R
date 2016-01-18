@@ -108,7 +108,7 @@ shinyUI(
                 'Box Cox Transform Data' = 'BoxCox',
                 'Yeo-Johnson Transform Data' = 'YeoJohnson',
                 'Inpute missing data with k-nearest neighbors' = 'knnImpute',
-                'Principle Compnent Analysis (95% variance)' = 'pca'
+                'Principle Component Analysis (95% variance)' = 'pca'
               ),
               selected='BoxCox', 
               multiple=TRUE
