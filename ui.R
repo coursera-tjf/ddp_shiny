@@ -2,6 +2,7 @@ library(shiny)
 
 # constants
 kaggle.url <- 'https://www.kaggle.com/c/titanic'
+github.url <- 'https://github.com/coursera-tjf/ddp_shiny'
 
 # Disable shiny widget, from:
 # https://groups.google.com/forum/#!topic/shiny-discuss/uSetp4TtW-s
@@ -43,7 +44,10 @@ shinyUI(
             tags$li('Build a prediction model - pre-process data, select features, and generate model'),
             tags$li('Evaluate prediction model - estimate in-sample and out-of-sample errors'),
             tags$li('Predict outcomes for test data')
-          )
+          ),
+        br(), br(),
+        h4('Code and data available'),
+        a(github.url)
         )
       ),
 
@@ -75,7 +79,6 @@ shinyUI(
       ),
       
       # explore the data
-      #TODO - need add NONE
       tabPanel('2. Explore Data',
         sidebarLayout(
           sidebarPanel(

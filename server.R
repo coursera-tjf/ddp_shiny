@@ -4,6 +4,12 @@ library(plyr)
 library(dplyr)
 library(caret)
 
+# constants
+# these HAVE to be raw urls from github
+# based on info from http://www.r-bloggers.com/data-on-github-the-easy-way-to-make-your-data-available/
+test.url <- 'https://github.com/coursera-tjf/ddp_shiny/raw/master/data/test.csv'
+train.url <- 'https://github.com/coursera-tjf/ddp_shiny/raw/master/data/train.csv'
+
 # Disable shiny widget, from:
 # https://groups.google.com/forum/#!topic/shiny-discuss/uSetp4TtW-s
 disable <- function(x) {
@@ -21,17 +27,15 @@ disable <- function(x) {
 
 getProcessData <- function(p) {
   # read in raw data
-  raw.training.all <- fread(file.path('data', 'train.csv'))
-  # TODO - handle all missing values - for right now, only use complete cases
+  raw.training.all <- fread(train.url)
+  # handle all missing values - for right now, only use complete cases
   raw.training.all <- raw.training.all[complete.cases(raw.training.all),]
   raw.training.outcome <- select(raw.training.all, one_of('Survived'))
   raw.training.predictors <- select(raw.training.all, -one_of('Survived'))
-  raw.testing.predictors <- fread(file.path('data', 'test.csv'))
+  raw.testing.predictors <- fread(test.url)
 
 
   # process data by adding factors for Survived, Pclass, Sex, and Embarked
-  #
-  # TODO - need handle missing data in Age
   process.data <- function(x) {
     # factorize some variables
     if ('Survived' %in% colnames(x))
@@ -153,7 +157,7 @@ shinyServer(
     })
     output$expColorVarSelector <- renderUI({
       selectInput('expColorVar', 'Variable to color by', 
-        choices=as.list(colnames(dataInput()$ptr)),
+        choices=as.list(c('None', colnames(dataInput()$ptr))),
         selected='Survived')
     })
     # create ggplot statement based on geom
