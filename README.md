@@ -1,8 +1,12 @@
-## Shiny app for [Titanic: Machine Learning from Disaster "Getting Started" Kaggle Competition](https://www.kaggle.com/c/titanic)
+## Shiny application for Interactive Machine Learning
+
+Data from [Titanic: Machine Learning from Disaster "Getting Started" Kaggle Competition](https://www.kaggle.com/c/titanic)
 
 Purpose - Use machine learning to predict which passengers survived the tragedy.
 
-Implementation - **NEED FINISH THIS**
+Implementation - interactive data summary, exploratory data analysis, data
+preprocessing, feature selection, algorithm selection, model evaluation, and
+prediction of survival using test data
 
 ### Dataset - downloaded from [here](https://www.kaggle.com/c/titanic/data)
 
