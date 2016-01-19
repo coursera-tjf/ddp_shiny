@@ -57,5 +57,5 @@ the definitions do not support such relations.
 
 ## Deliverables
 
-Shinyapps.io - https://coursera-tjf.shinyapps.io/ddp_shiny/
-Slidify presentation - http://coursera-tjf.github.io/ddp_shiny/
+* Shinyapps.io - https://coursera-tjf.shinyapps.io/ddp_shiny/
+* Slidify presentation - http://coursera-tjf.github.io/ddp_shiny/
