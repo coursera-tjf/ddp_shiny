@@ -1,0 +1,15 @@
+base
+magrittr
+colorout
+setwidth
+vimcom
+slidify
+data.table
+lattice
+ggplot2
+caret
+plyr
+dplyr
+knitr
+xtable
+randomForest
