@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Interactive Machine Learning Shiny Application</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Interactive Machine Learning Shiny Application">
+  <meta name="author" content="Coursera TJF">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Interactive Machine Learning Shiny Application</h1>
+    <h2>Kaggle - Titanic: Machine Learning from Disaster</h2>
+    <p>Coursera TJF<br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Interactive Machine Learning Example</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>Uses Kaggle &quot;Getting Started&quot; Competition <a href="https://www.kaggle.com/c/titanic">Titanic: Machine Learning from
+Disaster</a></li>
+<li>Purpose: Use machine learning to predict who survived the titanic disaster</li>
+<li>Contains:
+
+<ol>
+<li>Data summary (raw and processed as well as training, validation, and testing data)</li>
+<li>Interactive exploratory data analysis (one and two variable as well as
+pair plots)</li>
+<li>Interactive model creation (data preprocessing, feature selection, and
+machine learning algorithm selection)</li>
+<li>Model evaluation (in-sample error via training data and out-of-sample
+error via validation data)</li>
+<li>Test data results (model applied to testing data to predict survival)</li>
+</ol></li>
+</ul>
+
+<h4>Deployed Shiny App and Code Publically Available</h4>
+
+<ul>
+<li>shinyapps.io URL: <a href="https://coursera-tjf.shinyapps.io/ddp_shiny/">https://coursera-tjf.shinyapps.io/ddp_shiny/</a></li>
+<li>Code and data available in github repository:
+<a href="https://github.com/coursera-tjf/ddp_shiny">https://github.com/coursera-tjf/ddp_shiny</a></li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>Data summary and Pairs Plot</h2>
+  </hgroup>
+  <article data-timings="">
+    
+<div style='float:left;width:48%;' class='centered'>
+  <table><thead>
+<tr>
+<th align="left"></th>
+<th align="left">colnames</th>
+<th align="left">type</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="left">PassengerId</td>
+<td align="left">PassengerId</td>
+<td align="left">integer</td>
+</tr>
+<tr>
+<td align="left">Survived</td>
+<td align="left">Survived</td>
+<td align="left">factor</td>
+</tr>
+<tr>
+<td align="left">Pclass</td>
+<td align="left">Pclass</td>
+<td align="left">factor</td>
+</tr>
+<tr>
+<td align="left">Name</td>
+<td align="left">Name</td>
+<td align="left">factor</td>
+</tr>
+<tr>
+<td align="left">Sex</td>
+<td align="left">Sex</td>
+<td align="left">factor</td>
+</tr>
+<tr>
+<td align="left">Age</td>
+<td align="left">Age</td>
+<td align="left">numeric</td>
+</tr>
+<tr>
+<td align="left">SibSp</td>
+<td align="left">SibSp</td>
+<td align="left">integer</td>
+</tr>
+<tr>
+<td align="left">Parch</td>
+<td align="left">Parch</td>
+<td align="left">integer</td>
+</tr>
+<tr>
+<td align="left">Ticket</td>
+<td align="left">Ticket</td>
+<td align="left">factor</td>
+</tr>
+<tr>
+<td align="left">Fare</td>
+<td align="left">Fare</td>
+<td align="left">numeric</td>
+</tr>
+<tr>
+<td align="left">Cabin</td>
+<td align="left">Cabin</td>
+<td align="left">factor</td>
+</tr>
+<tr>
+<td align="left">Embarked</td>
+<td align="left">Embarked</td>
+<td align="left">factor</td>
+</tr>
+</tbody></table>
+
+</div>
+<div style='float:right;width:48%;'>
+  <p><img src="assets/fig/pairs_plot-1.png" alt="plot of chunk pairs_plot"></p>
+
+</div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Build prediction model</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>Preprocessing = center, scale, BoxCox</li>
+<li>Method = Random Forests</li>
+<li>Data = Training data set</li>
+</ul>
+
+<pre><code>## Random Forest 
+## 
+## 428 samples
+##  11 predictor
+##   2 classes: &#39;No&#39;, &#39;Yes&#39; 
+## 
+## Pre-processing: centered (4), scaled (4), principal component
+##  signal extraction (4) 
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 428, 428, 428, 428, 428, 428, ... 
+## Resampling results across tuning parameters:
+## 
+##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD  
+##   2     0.7742761  0.5315989  0.03218209   0.06482501
+##   3     0.7757793  0.5351034  0.03245668   0.06502107
+##   4     0.7750189  0.5331350  0.03165821   0.06367792
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was mtry = 3.
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Evaluate model performance (using verification data)</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction  No Yes
+##        No  145  37
+##        Yes  25  79
+##                                           
+##                Accuracy : 0.7832          
+##                  95% CI : (0.7309, 0.8296)
+##     No Information Rate : 0.5944          
+##     P-Value [Acc &gt; NIR] : 1.026e-11       
+##                                           
+##                   Kappa : 0.5429          
+##  Mcnemar&#39;s Test P-Value : 0.1624          
+##                                           
+##             Sensitivity : 0.8529          
+##             Specificity : 0.6810          
+##          Pos Pred Value : 0.7967          
+##          Neg Pred Value : 0.7596          
+##              Prevalence : 0.5944          
+##          Detection Rate : 0.5070          
+##    Detection Prevalence : 0.6364          
+##       Balanced Accuracy : 0.7670          
+##                                           
+##        &#39;Positive&#39; Class : No              
+## 
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Interactive Machine Learning Example'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Data summary and Pairs Plot'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Build prediction model'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Evaluate model performance (using verification data)'>
+         4
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
